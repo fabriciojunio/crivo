@@ -1,5 +1,5 @@
-crivo
-crivo.exe
+/crivo
+/crivo.exe
 *.sarif
 !testdata/*.sarif
 /dist/

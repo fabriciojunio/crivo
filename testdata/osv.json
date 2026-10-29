@@ -1,0 +1,786 @@
+{
+  "results": [
+    {
+      "source": {
+        "path": "C:/Users/Win 10/dev/ConectAgente/ConectAgente-mobile/package-lock.json",
+        "type": "lockfile"
+      },
+      "packages": [
+        {
+          "package": {
+            "name": "deepmerge",
+            "version": "4.3.1",
+            "ecosystem": "npm",
+            "purl": "pkg:npm/deepmerge@4.3.1?source=PUBLIC_REGISTRY"
+          },
+          "groups": [
+            {
+              "ids": [
+                "GHSA-gcqx-w48m-w2h4"
+              ],
+              "aliases": [
+                "CVE-2026-93753",
+                "GHSA-gcqx-w48m-w2h4"
+              ],
+              "max_severity": "5.3"
+            }
+          ],
+          "vulnerabilities": [
+            {
+              "affected": [
+                {
+                  "database_specific": {
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/09/GHSA-gcqx-w48m-w2h4/GHSA-gcqx-w48m-w2h4.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "deepmerge",
+                    "purl": "pkg:npm/deepmerge"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "4.2.0"
+                        },
+                        {
+                          "last_affected": "4.3.1"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                }
+              ],
+              "aliases": [
+                "CVE-2026-93753"
+              ],
+              "database_specific": {
+                "cwe_ids": [
+                  "CWE-1321"
+                ],
+                "github_reviewed": true,
+                "github_reviewed_at": "2026-10-27T21:34:55Z",
+                "nvd_published_at": "2026-09-18T18:18:34Z",
+                "severity": "LOW"
+              },
+              "details": "deepmerge through 4.3.1 contains a prototype poisoning vulnerability in the mergeObject() function that fails to properly validate keys being written to target objects. Attackers can supply malicious source objects in merge operations to inject attacker-controlled properties into the returned object's prototype, causing applications to inherit unintended values when accessing properties without own-property checks.",
+              "id": "GHSA-gcqx-w48m-w2h4",
+              "modified": "2026-10-27T21:45:04.256048049Z",
+              "published": "2026-09-18T18:31:44Z",
+              "references": [
+                {
+                  "type": "ADVISORY",
+                  "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-93753"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/TehShrike/deepmerge/issues/273"
+                },
+                {
+                  "type": "PACKAGE",
+                  "url": "https://github.com/TehShrike/deepmerge"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/TehShrike/deepmerge/blob/5b87756a5671635679001cbac72aa42f23472c81/index.js#L39-L60"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://www.vulncheck.com/advisories/deepmerge-through-4.3.1-prototype-poisoning-via-mergeobject"
+                }
+              ],
+              "schema_version": "1.9.2",
+              "severity": [
+                {
+                  "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+                  "type": "CVSS_V3"
+                },
+                {
+                  "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:U",
+                  "type": "CVSS_V4"
+                }
+              ],
+              "summary": "deepmerge mergeObject() allows prototype poisoning of returned objects"
+            }
+          ]
+        },
+        {
+          "package": {
+            "name": "image-size",
+            "version": "1.2.1",
+            "ecosystem": "npm",
+            "purl": "pkg:npm/image-size@1.2.1?source=PUBLIC_REGISTRY"
+          },
+          "groups": [
+            {
+              "ids": [
+                "GHSA-5p2g-fcmc-qvqq"
+              ],
+              "aliases": [
+                "CVE-2025-71329",
+                "GHSA-5p2g-fcmc-qvqq"
+              ],
+              "max_severity": "8.7"
+            },
+            {
+              "ids": [
+                "GHSA-w3rx-r6r6-pgpr"
+              ],
+              "aliases": [
+                "CVE-2025-71330",
+                "GHSA-w3rx-r6r6-pgpr"
+              ],
+              "max_severity": "8.7"
+            }
+          ],
+          "vulnerabilities": [
+            {
+              "affected": [
+                {
+                  "database_specific": {
+                    "last_known_affected_version_range": "\u003c= 2.0.2",
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/06/GHSA-5p2g-fcmc-qvqq/GHSA-5p2g-fcmc-qvqq.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "image-size",
+                    "purl": "pkg:npm/image-size"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "1.2.0"
+                        },
+                        {
+                          "fixed": "2.0.3"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                }
+              ],
+              "aliases": [
+                "CVE-2025-71329"
+              ],
+              "database_specific": {
+                "cwe_ids": [
+                  "CWE-835"
+                ],
+                "github_reviewed": true,
+                "github_reviewed_at": "2026-08-07T20:54:40Z",
+                "nvd_published_at": "2026-06-10T14:16:30Z",
+                "severity": "HIGH"
+              },
+              "details": "image-size through 2.0.2 contains a denial of service vulnerability that allows remote attackers to permanently block the Node.js event loop by supplying a specially crafted image buffer with a zero-valued size field in a recognized box-type. Attackers can trigger an infinite loop in the JXL or HEIF image parsers by providing a crafted image containing a box with a size of zero, causing the offset to never advance and permanently hanging the application.",
+              "id": "GHSA-5p2g-fcmc-qvqq",
+              "modified": "2026-09-24T18:45:10.915244487Z",
+              "published": "2026-06-10T15:31:30Z",
+              "references": [
+                {
+                  "type": "ADVISORY",
+                  "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-71329"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://codeberg.org/image-size/image-size/commit/e6e83a5578961de81f6d5834d90fb7430d8f29a5"
+                },
+                {
+                  "type": "PACKAGE",
+                  "url": "https://github.com/image-size/image-size"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://joshua.hu/image-size-infinite-loop-dos-vulnerabilities"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://web.archive.org/web/20260224152152/https://github.com/image-size/image-size/pull/439"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://www.vulncheck.com/advisories/image-size-denial-of-service-via-infinite-loop-in-jxl-heif-parser"
+                }
+              ],
+              "schema_version": "1.9.0",
+              "severity": [
+                {
+                  "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "type": "CVSS_V3"
+                },
+                {
+                  "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N",
+                  "type": "CVSS_V4"
+                }
+              ],
+              "summary": "image-size: JXL and HEIF parsers allow denial of service through infinite loops"
+            },
+            {
+              "affected": [
+                {
+                  "database_specific": {
+                    "last_known_affected_version_range": "\u003c= 2.0.2",
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/06/GHSA-w3rx-r6r6-pgpr/GHSA-w3rx-r6r6-pgpr.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "image-size",
+                    "purl": "pkg:npm/image-size"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "0.6.3"
+                        },
+                        {
+                          "fixed": "2.0.3"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                }
+              ],
+              "aliases": [
+                "CVE-2025-71330"
+              ],
+              "database_specific": {
+                "cwe_ids": [
+                  "CWE-835"
+                ],
+                "github_reviewed": true,
+                "github_reviewed_at": "2026-08-07T20:55:24Z",
+                "nvd_published_at": "2026-06-10T14:16:30Z",
+                "severity": "HIGH"
+              },
+              "details": "image-size through 2.0.2 contains a denial of service vulnerability that allows remote attackers to permanently block the Node.js event loop by supplying a specially crafted ICNS image buffer. Attackers can craft an ICNS buffer containing valid magic bytes and a zero-valued entry length field to trigger an infinite loop in the ICNS parser, as the offset is never incremented when the entry length field is 0, causing the while loop condition to remain true indefinitely.",
+              "id": "GHSA-w3rx-r6r6-pgpr",
+              "modified": "2026-09-24T18:30:11.322772203Z",
+              "published": "2026-06-10T15:31:30Z",
+              "references": [
+                {
+                  "type": "ADVISORY",
+                  "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-71330"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://codeberg.org/image-size/image-size/commit/e6e83a5578961de81f6d5834d90fb7430d8f29a5"
+                },
+                {
+                  "type": "PACKAGE",
+                  "url": "https://github.com/image-size/image-size"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://joshua.hu/image-size-infinite-loop-dos-vulnerabilities"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://web.archive.org/web/20260224152152/https://github.com/image-size/image-size/pull/439"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://www.vulncheck.com/advisories/image-size-denial-of-service-via-malformed-icns-image-parsing"
+                }
+              ],
+              "schema_version": "1.9.0",
+              "severity": [
+                {
+                  "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "type": "CVSS_V3"
+                },
+                {
+                  "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+                  "type": "CVSS_V4"
+                }
+              ],
+              "summary": "image-size: ICNS parser allows denial of service through an infinite loop"
+            }
+          ]
+        },
+        {
+          "package": {
+            "name": "node-forge",
+            "version": "1.4.0",
+            "ecosystem": "npm",
+            "purl": "pkg:npm/node-forge@1.4.0?source=PUBLIC_REGISTRY"
+          },
+          "groups": [
+            {
+              "ids": [
+                "GHSA-86w9-cpqp-85rv"
+              ],
+              "aliases": [
+                "CVE-2026-33894",
+                "CVE-2026-85393",
+                "GHSA-86w9-cpqp-85rv",
+                "GHSA-ppp5-5v6c-4jwp"
+              ],
+              "max_severity": "8.7"
+            }
+          ],
+          "vulnerabilities": [
+            {
+              "affected": [
+                {
+                  "database_specific": {
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/09/GHSA-86w9-cpqp-85rv/GHSA-86w9-cpqp-85rv.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "node-forge",
+                    "purl": "pkg:npm/node-forge"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "0"
+                        },
+                        {
+                          "last_affected": "1.4.0"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                }
+              ],
+              "aliases": [
+                "CVE-2026-33894",
+                "CVE-2026-85393",
+                "GHSA-ppp5-5v6c-4jwp"
+              ],
+              "database_specific": {
+                "cwe_ids": [
+                  "CWE-347"
+                ],
+                "github_reviewed": true,
+                "github_reviewed_at": "2026-10-01T21:09:09Z",
+                "nvd_published_at": "2026-09-03T19:17:31Z",
+                "severity": "HIGH"
+              },
+              "details": "node-forge through 1.4.0 fails to validate element count in nested DigestAlgorithm sequences during RSA PKCS#1 v1.5 signature verification. Attackers can embed garbage bytes inside the DigestAlgorithm sequence to forge valid signatures for arbitrary messages using low-exponent RSA keys. This is an incomplete fix for CVE-2026-33894.",
+              "id": "GHSA-86w9-cpqp-85rv",
+              "modified": "2026-10-01T21:40:55.016251436Z",
+              "published": "2026-09-03T21:31:15Z",
+              "references": [
+                {
+                  "type": "ADVISORY",
+                  "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-85393"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/digitalbazaar/forge/issues/1149"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/digitalbazaar/forge/pull/1152"
+                },
+                {
+                  "type": "ADVISORY",
+                  "url": "https://github.com/advisories/GHSA-ppp5-5v6c-4jwp"
+                },
+                {
+                  "type": "PACKAGE",
+                  "url": "https://github.com/digitalbazaar/forge"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/digitalbazaar/forge/blob/v1.4.0/lib/asn1.js"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/digitalbazaar/forge/blob/v1.4.0/lib/rsa.js"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://www.vulncheck.com/advisories/node-forge-through-1.4.0-rsa-pkcs-1-1.5-signature-forgery-via-nested-digestalgorithm-padding"
+                }
+              ],
+              "schema_version": "1.9.0",
+              "severity": [
+                {
+                  "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                  "type": "CVSS_V3"
+                },
+                {
+                  "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N",
+                  "type": "CVSS_V4"
+                }
+              ],
+              "summary": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements"
+            }
+          ]
+        },
+        {
+          "package": {
+            "name": "uuid",
+            "version": "7.0.3",
+            "ecosystem": "npm",
+            "purl": "pkg:npm/uuid@7.0.3?source=PUBLIC_REGISTRY"
+          },
+          "groups": [
+            {
+              "ids": [
+                "GHSA-w5hq-g745-h8pq"
+              ],
+              "aliases": [
+                "CVE-2026-41907",
+                "CVE-2026-41988",
+                "GHSA-w5hq-g745-h8pq"
+              ],
+              "max_severity": "7.5"
+            }
+          ],
+          "vulnerabilities": [
+            {
+              "affected": [
+                {
+                  "database_specific": {
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-w5hq-g745-h8pq/GHSA-w5hq-g745-h8pq.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "uuid",
+                    "purl": "pkg:npm/uuid"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "0"
+                        },
+                        {
+                          "fixed": "11.1.1"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                },
+                {
+                  "database_specific": {
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-w5hq-g745-h8pq/GHSA-w5hq-g745-h8pq.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "uuid",
+                    "purl": "pkg:npm/uuid"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "12.0.0"
+                        },
+                        {
+                          "fixed": "12.0.1"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                },
+                {
+                  "database_specific": {
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/04/GHSA-w5hq-g745-h8pq/GHSA-w5hq-g745-h8pq.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "uuid",
+                    "purl": "pkg:npm/uuid"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "13.0.0"
+                        },
+                        {
+                          "fixed": "13.0.1"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                }
+              ],
+              "aliases": [
+                "CVE-2026-41907",
+                "CVE-2026-41988"
+              ],
+              "database_specific": {
+                "cwe_ids": [
+                  "CWE-1285",
+                  "CWE-787"
+                ],
+                "github_reviewed": true,
+                "github_reviewed_at": "2026-04-22T20:53:24Z",
+                "nvd_published_at": "2026-04-24T19:17:14Z",
+                "severity": "MODERATE"
+              },
+              "details": "### Summary\n\nThe `v3()`, `v5()`, and `v6()` [API methods](https://github.com/uuidjs/uuid#api-summary) (not `uuid` release versions) accept external output buffers but do not reject out-of-range writes (small `buf` or large `offset`).  \nBy contrast, `v4()`, `v1()`, and `v7()` API methods explicitly throw `RangeError` on invalid bounds.\n\nThis inconsistency allows **silent partial writes** into caller-provided buffers.\n\n\n### Affected code\n\n- `src/v35.ts` (`v3()`/`v5()` path) writes `buf[offset + i]` without bounds validation.\n- `src/v6.ts` writes `buf[offset + i]` without bounds validation.\n\n### Reproducible PoC\n\n```bash\ncd /home/StrawHat/uuid\nnpm ci\nnpm run build\n\nnode --input-type=module -e \"\nimport {v4,v5,v6} from './dist-node/index.js';\nconst ns='6ba7b810-9dad-11d1-80b4-00c04fd430c8';\nfor (const [name,fn] of [\n  ['v4()',()=\u003ev4({},new Uint8Array(8),4)],\n  ['v5()',()=\u003ev5('x',ns,new Uint8Array(8),4)],\n  ['v6()',()=\u003ev6({},new Uint8Array(8),4)],\n]) {\n  try { fn(); console.log(name,'NO_THROW'); }\n  catch(e){ console.log(name,'THREW',e.name); }\n}\"\n```\n\nObserved:\n\n- `v4() THREW RangeError`\n- `v5() NO_THROW`\n- `v6() NO_THROW`\n\nExample partial overwrite evidence captured during audit:\n\n```text\nsame true buf [\n  170, 170, 170, 170,\n   75, 224, 100,  63\n]\nv6 [\n  187, 187, 187, 187,\n   31,  19, 185,  64\n]\n```\n\n### Security impact\n\n- **Primary**: integrity/robustness issue (silent partial output).\n- If an application assumes full UUID writes into preallocated buffers, this can produce malformed/truncated/partially stale identifiers without error.\n- In systems where caller-controlled offsets/buffer sizes are exposed indirectly, this may become a security-relevant logic flaw.\n\n### Suggested fix\n\nAdd the same guard used by `v4()`/`v1()`/`v7()`:\n\n```ts\nif (offset \u003c 0 || offset + 16 \u003e buf.length) {\n  throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);\n}\n```\n\nApply to:\n\n- `src/v35.ts` (covers `v3()` and `v5()`)\n- `src/v6.ts`",
+              "id": "GHSA-w5hq-g745-h8pq",
+              "modified": "2026-09-10T03:51:03.663336650Z",
+              "published": "2026-04-22T20:53:24Z",
+              "references": [
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/security/advisories/GHSA-w5hq-g745-h8pq"
+                },
+                {
+                  "type": "ADVISORY",
+                  "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-41907"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/commit/32389c887c9e75f90442ee4cc95bbab0c4e8346e"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/commit/3d2c5b0342f0fcb52a5ac681c3d47c13e7444b34"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/commit/3d61d6ac1f782cf6b1dd8661c60f11722cd49a0d"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/commit/9d27ddf7046ce496ef39569ff84d948eeff9cb2a"
+                },
+                {
+                  "type": "PACKAGE",
+                  "url": "https://github.com/uuidjs/uuid"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/releases/tag/v11.1.1"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/releases/tag/v12.0.1"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/releases/tag/v13.0.1"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://github.com/uuidjs/uuid/releases/tag/v14.0.0"
+                }
+              ],
+              "schema_version": "1.9.0",
+              "severity": [
+                {
+                  "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                  "type": "CVSS_V3"
+                },
+                {
+                  "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N",
+                  "type": "CVSS_V4"
+                }
+              ],
+              "summary": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided"
+            }
+          ]
+        },
+        {
+          "package": {
+            "name": "xlsx",
+            "version": "0.20.3",
+            "ecosystem": "npm",
+            "purl": "pkg:npm/xlsx@0.20.3?source=OTHER"
+          },
+          "groups": [
+            {
+              "ids": [
+                "GHSA-4r6h-8v6p-xvw6"
+              ],
+              "aliases": [
+                "CVE-2023-30533",
+                "GHSA-4r6h-8v6p-xvw6"
+              ],
+              "max_severity": "7.8"
+            },
+            {
+              "ids": [
+                "GHSA-5pgg-2g8v-p4x9"
+              ],
+              "aliases": [
+                "CVE-2024-22363",
+                "GHSA-5pgg-2g8v-p4x9"
+              ],
+              "max_severity": "7.5"
+            }
+          ],
+          "vulnerabilities": [
+            {
+              "affected": [
+                {
+                  "database_specific": {
+                    "last_known_affected_version_range": "\u003c 0.19.3",
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2023/04/GHSA-4r6h-8v6p-xvw6/GHSA-4r6h-8v6p-xvw6.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "xlsx",
+                    "purl": "pkg:npm/xlsx"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "0"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                }
+              ],
+              "aliases": [
+                "CVE-2023-30533"
+              ],
+              "database_specific": {
+                "cwe_ids": [
+                  "CWE-1321"
+                ],
+                "github_reviewed": true,
+                "github_reviewed_at": "2023-04-24T22:40:42Z",
+                "nvd_published_at": "2023-04-24T08:15:07Z",
+                "severity": "HIGH"
+              },
+              "details": "All versions of SheetJS CE through 0.19.2 are vulnerable to \"Prototype Pollution\" when reading specially crafted files. Workflows that do not read arbitrary files (for example, exporting data to spreadsheet files) are unaffected.\n\nA non-vulnerable version cannot be found via npm, as the repository hosted on GitHub and the npm package `xlsx` are no longer maintained. Version 0.19.3 can be downloaded via https://cdn.sheetjs.com/.",
+              "id": "GHSA-4r6h-8v6p-xvw6",
+              "modified": "2025-09-19T15:23:40Z",
+              "published": "2023-04-24T09:30:19Z",
+              "references": [
+                {
+                  "type": "ADVISORY",
+                  "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-30533"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://cdn.sheetjs.com"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://cdn.sheetjs.com/advisories/CVE-2023-30533"
+                },
+                {
+                  "type": "PACKAGE",
+                  "url": "https://git.sheetjs.com/sheetjs/sheetjs"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://git.sheetjs.com/sheetjs/sheetjs/issues/2667"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://git.sheetjs.com/sheetjs/sheetjs/issues/2986"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://git.sheetjs.com/sheetjs/sheetjs/src/branch/master/CHANGELOG.md"
+                }
+              ],
+              "schema_version": "1.9.0",
+              "severity": [
+                {
+                  "score": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+                  "type": "CVSS_V3"
+                }
+              ],
+              "summary": "Prototype Pollution in sheetJS"
+            },
+            {
+              "affected": [
+                {
+                  "database_specific": {
+                    "last_known_affected_version_range": "\u003c 0.20.2",
+                    "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2024/04/GHSA-5pgg-2g8v-p4x9/GHSA-5pgg-2g8v-p4x9.json"
+                  },
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "xlsx",
+                    "purl": "pkg:npm/xlsx"
+                  },
+                  "ranges": [
+                    {
+                      "events": [
+                        {
+                          "introduced": "0"
+                        }
+                      ],
+                      "type": "SEMVER"
+                    }
+                  ]
+                }
+              ],
+              "aliases": [
+                "CVE-2024-22363"
+              ],
+              "database_specific": {
+                "cwe_ids": [
+                  "CWE-1333"
+                ],
+                "github_reviewed": true,
+                "github_reviewed_at": "2024-04-08T13:47:03Z",
+                "nvd_published_at": "2024-04-05T06:15:10Z",
+                "severity": "HIGH"
+              },
+              "details": "SheetJS Community Edition before 0.20.2 is vulnerable.to Regular Expression Denial of Service (ReDoS).\n\nA non-vulnerable version cannot be found via npm, as the repository hosted on GitHub and the npm package `xlsx` are no longer maintained. Version 0.20.2 can be downloaded via https://cdn.sheetjs.com/.",
+              "id": "GHSA-5pgg-2g8v-p4x9",
+              "modified": "2026-09-10T03:49:18.872216794Z",
+              "published": "2024-04-05T06:30:46Z",
+              "references": [
+                {
+                  "type": "ADVISORY",
+                  "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-22363"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://cdn.sheetjs.com"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://cdn.sheetjs.com/advisories/CVE-2024-22363"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://cwe.mitre.org/data/definitions/1333.html"
+                },
+                {
+                  "type": "PACKAGE",
+                  "url": "https://git.sheetjs.com/sheetjs/sheetjs"
+                },
+                {
+                  "type": "WEB",
+                  "url": "https://git.sheetjs.com/sheetjs/sheetjs/src/tag/v0.20.2"
+                }
+              ],
+              "schema_version": "1.9.0",
+              "severity": [
+                {
+                  "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "type": "CVSS_V3"
+                }
+              ],
+              "summary": "SheetJS Regular Expression Denial of Service (ReDoS)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "experimental_config": {
+    "licenses": {
+      "summary": false,
+      "allowlist": null
+    }
+  }
+}

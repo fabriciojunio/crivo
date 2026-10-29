@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # O crivo não tem dependência externa; o Dependabot cuida do Go do go.mod
+  # e das actions. Versão nova só depois de 7 dias.
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "build(deps)"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci(deps)"

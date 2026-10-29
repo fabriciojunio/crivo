@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: ["produção", "homologação"]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  teste:
+    name: Formatação, vet, testes e fuzzing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Formatação
+        run: test -z "$(gofmt -l .)"
+      - name: Vet
+        run: go vet ./...
+      - name: Testes com detector de corrida
+        run: go test -race -count=1 ./...
+      # Os leitores recebem arquivo de outra ferramenta; um minuto de fuzzing a
+      # cada push procura a entrada que derruba o processo.
+      - name: Fuzzing dos leitores
+        run: go test -run '^$' -fuzz FuzzParse -fuzztime 60s ./internal/parser
+      - name: Compilar
+        run: go build -trimpath -o crivo ./cmd/crivo
+
+  seguranca:
+    name: Segurança (govulncheck, gosec e o próprio crivo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Vulnerabilidade conhecida no código e na biblioteca padrão
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+      # O crivo faz a triagem do próprio gosec: a ferramenta passa pelo mesmo
+      # portão que ela oferece aos outros projetos.
+      - name: Análise estática com triagem do crivo
+        run: |
+          go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -no-fail -fmt sarif -out gosec.sarif ./...
+          go run ./cmd/crivo -offline -sarif gosec.sarif -falhar-em P2
+      - name: Autoria do histórico
+        run: |
+          if git log --format=%B | grep -Eiq '^co-authored-by:.*(claude|anthropic)|generated with.*claude'; then
+            echo "Commit com coautoria de ferramenta de IA no histórico"
+            exit 1
+          fi

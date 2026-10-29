@@ -1,0 +1,5 @@
+crivo
+crivo.exe
+*.sarif
+!testdata/*.sarif
+/dist/

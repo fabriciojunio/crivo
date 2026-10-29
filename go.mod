@@ -1,3 +1,3 @@
 module github.com/fabriciojunio/crivo
 
-go 1.27
+go 1.25

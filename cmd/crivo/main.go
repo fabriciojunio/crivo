@@ -90,6 +90,7 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 
 	var accepted accept.List
 	if *acceptFile != "" {
+		// #nosec G304 -- arquivo de aceites indicado por quem roda a ferramenta.
 		f, err := os.Open(*acceptFile)
 		if err != nil {
 			fmt.Fprintln(stderr, err)
@@ -169,6 +170,9 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 }
 
 func readReport(format parser.Format, path string) ([]finding.Finding, error) {
+	// #nosec G304 -- abrir o arquivo indicado na linha de comando é o propósito
+	// da ferramenta; quem a roda já tem acesso a ele. O conteúdo é limitado e
+	// validado pelo leitor.
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err

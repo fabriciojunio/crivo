@@ -79,7 +79,7 @@ func parseSARIF(data []byte) ([]finding.Finding, error) {
 			}
 			if len(res.Locations) > 0 {
 				loc := res.Locations[0].PhysicalLocation
-				f.Location = fmt.Sprintf("%s:%d", loc.ArtifactLocation.URI, loc.Region.StartLine)
+				f.Location = location(loc.ArtifactLocation.URI, loc.Region.StartLine)
 			}
 			out = append(out, f)
 		}
@@ -97,5 +97,20 @@ func severityFromLevel(level string) finding.Severity {
 		return finding.SeverityLow
 	default:
 		return finding.SeverityUnknown
+	}
+}
+
+// location escreve arquivo:linha. Há ferramenta que, em alguns sistemas,
+// grava o achado sem o arquivo; aí sobra a linha, dita por extenso.
+func location(uri string, line int) string {
+	switch {
+	case uri != "" && line > 0:
+		return fmt.Sprintf("%s:%d", uri, line)
+	case uri != "":
+		return uri
+	case line > 0:
+		return fmt.Sprintf("linha %d", line)
+	default:
+		return ""
 	}
 }

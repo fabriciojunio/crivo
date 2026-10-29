@@ -132,3 +132,17 @@ func FuzzParse(f *testing.F) {
 		}
 	})
 }
+
+func TestLocationWithoutFile(t *testing.T) {
+	cases := map[string]string{
+		location("a.go", 3): "a.go:3",
+		location("a.go", 0): "a.go",
+		location("", 172):   "linha 172",
+		location("", 0):     "",
+	}
+	for got, want := range cases {
+		if got != want {
+			t.Errorf("location = %q, quero %q", got, want)
+		}
+	}
+}

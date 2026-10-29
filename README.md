@@ -111,3 +111,8 @@ internal/accept/    riscos aceitos com prazo
 internal/report/    Markdown e JSON
 internal/summary/   resumo opcional por modelo local
 ```
+
+## Uso de IA
+
+Este projeto foi estruturado com apoio de ferramentas de IA generativa. Modelagem, regras de
+negócio, revisão do código e conclusões foram revisadas e validadas por Fabrício Júnio.

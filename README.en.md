@@ -111,3 +111,8 @@ internal/accept/    time-boxed accepted risks
 internal/report/    Markdown and JSON
 internal/summary/   optional summary by a local model
 ```
+
+## Use of AI
+
+This project was structured with the support of generative AI tools. Modelling, business rules,
+code review and conclusions were reviewed and validated by Fabrício Júnio.

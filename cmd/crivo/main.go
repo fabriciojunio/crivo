@@ -58,6 +58,7 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 	failAt := fs.String("falhar-em", "P2", "barra o pipeline com achado deste nível ou mais urgente (P1 a P4, ou nunca)")
 	format := fs.String("formato", "md", "md ou json")
 	model := fs.String("resumo", "", "modelo do Ollama local para resumir a triagem (opcional)")
+	modelTimeout := fs.Duration("resumo-tempo", time.Minute, "tempo máximo do resumo; sem GPU, modelo de 3B pode precisar de alguns minutos")
 	if err := fs.Parse(args); err != nil {
 		return exitError
 	}
@@ -97,14 +98,17 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 			return exitError
 		}
 		accepted, err = accept.Load(f)
-		f.Close()
+		if errClose := f.Close(); err == nil {
+			err = errClose
+		}
 		if err != nil {
 			fmt.Fprintln(stderr, err)
 			return exitError
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	// Dois minutos para EPSS e KEV, mais o tempo do resumo quando ele é pedido.
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute+*modelTimeout)
 	defer cancel()
 	now := d.now()
 	res := report.Result{Generated: now, Offline: *offline}
@@ -136,7 +140,7 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 	priority.Sort(res.Open)
 
 	if *model != "" && len(res.Open) > 0 {
-		text, err := summary.New(*model).Summarize(ctx, res.Open)
+		text, err := summary.New(*model, *modelTimeout).Summarize(ctx, res.Open)
 		if err != nil {
 			fmt.Fprintf(stderr, "aviso: resumo não gerado: %v\n", err)
 		} else {

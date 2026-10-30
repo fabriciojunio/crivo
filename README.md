@@ -47,6 +47,7 @@ crivo -osv osv.json -sarif codeql.sarif -zap zap.json \
 | `-formato` | `md` (tabela para o pull request) ou `json` |
 | `-offline` | não consulta EPSS nem KEV |
 | `-resumo` | nome de um modelo do Ollama local para resumir a triagem |
+| `-resumo-tempo` | tempo máximo do resumo; o padrão é `1m`, e sem GPU um modelo de 3B pode pedir alguns minutos |
 
 Saída `0` quando passa, `1` quando barra e `2` quando não conseguiu rodar. A diferença importa: erro
 de leitura não pode passar como pipeline verde.
@@ -84,7 +85,7 @@ Sem o modelo, a triagem é a mesma.
 ### No pull request
 
 O workflow `triagem-pr.yml` sobe o Ollama como contêiner dentro do próprio runner, com um modelo
-pequeno (`llama3.2:1b`), roda a triagem e comenta o resultado no pull request, atualizando o mesmo
+pequeno (`qwen2.5:3b`, que escreve português melhor que os modelos de 1B), roda a triagem e comenta o resultado no pull request, atualizando o mesmo
 comentário a cada push. Nada sai do runner. A decisão de barrar continua com as regras de
 prioridade: o modelo só escreve o resumo. Pull request de fork recebe token só de leitura, então o
 resumo fica no resumo da execução, sem comentário.

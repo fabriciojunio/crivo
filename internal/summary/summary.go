@@ -38,11 +38,15 @@ type Client struct {
 	Model string
 }
 
-// New cria o cliente. Modelo local em máquina comum demora; um minuto cobre
-// o primeiro carregamento sem prender o pipeline indefinidamente.
-func New(model string) *Client {
-	return &Client{HTTP: &http.Client{Timeout: time.Minute}, URL: DefaultURL, Model: model}
+// New cria o cliente. O tempo vem de quem roda: em máquina com GPU um minuto
+// sobra; num runner de CI só com CPU, um modelo de 3B leva alguns minutos.
+func New(model string, timeout time.Duration) *Client {
+	return &Client{HTTP: &http.Client{Timeout: timeout}, URL: DefaultURL, Model: model}
 }
+
+// maxTokens limita a resposta no próprio modelo: cinco frases cabem com
+// folga, e o modelo não gasta tempo escrevendo o que vai ser cortado.
+const maxTokens = 300
 
 func checkLocal(raw string) error {
 	u, err := url.Parse(raw)
@@ -64,9 +68,30 @@ func checkLocal(raw string) error {
 // fora, porque é por ele que alguém tentaria injetar instrução no modelo.
 func Prompt(open []priority.Triage) string {
 	var b strings.Builder
-	b.WriteString("Você resume uma triagem de vulnerabilidades para uma pessoa que decide prioridades. ")
-	b.WriteString("Escreva em português, em até cinco frases, sem inventar achado que não está na lista. ")
-	b.WriteString("Diga o que corrigir primeiro e por quê.\n\nAchados:\n")
+	// Modelo pequeno se perde com instrução vaga: o texto diz o que é a lista,
+	// o formato da resposta e o que não fazer.
+	b.WriteString("Abaixo está a lista de vulnerabilidades encontradas num projeto de software, ")
+	b.WriteString("já ordenada por prioridade (P1 é a mais urgente) e com o prazo de correção de cada uma.\n")
+	b.WriteString("Escreva um resumo em português do Brasil, em no máximo cinco frases, para a gerente do projeto: ")
+	b.WriteString("quantas falhas existem, quais corrigir primeiro e por quê, citando o pacote e o prazo.\n")
+	b.WriteString("Use só o que está na lista e os totais abaixo. Não invente falha, não escreva link nem código.\n\n")
+	// Totais e prazos prontos: modelo pequeno erra conta, e a lista abaixo
+	// mostra só os dez primeiros.
+	total := map[priority.Level]int{}
+	prazo := map[priority.Level]time.Time{}
+	for _, t := range open {
+		total[t.Level]++
+		if prazo[t.Level].IsZero() || t.Due.Before(prazo[t.Level]) {
+			prazo[t.Level] = t.Due
+		}
+	}
+	fmt.Fprintf(&b, "Total: %d vulnerabilidades.\n", len(open))
+	for _, nivel := range []priority.Level{priority.P1, priority.P2, priority.P3, priority.P4} {
+		if total[nivel] > 0 {
+			fmt.Fprintf(&b, "%s: %d, prazo a partir de %s.\n", nivel, total[nivel], prazo[nivel].Format(time.DateOnly))
+		}
+	}
+	b.WriteString("\nVulnerabilidades:\n")
 	for i, t := range open {
 		if i == 10 {
 			fmt.Fprintf(&b, "- e mais %d achados de prioridade menor\n", len(open)-10)
@@ -82,7 +107,10 @@ func (c *Client) Summarize(ctx context.Context, open []priority.Triage) (string,
 	if err := checkLocal(c.URL); err != nil {
 		return "", err
 	}
-	body, _ := json.Marshal(map[string]any{"model": c.Model, "prompt": Prompt(open), "stream": false})
+	body, _ := json.Marshal(map[string]any{
+		"model": c.Model, "prompt": Prompt(open), "stream": false,
+		"options": map[string]any{"num_predict": maxTokens},
+	})
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.URL, bytes.NewReader(body))
 	if err != nil {
 		return "", err

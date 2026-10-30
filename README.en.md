@@ -75,7 +75,20 @@ summary aimed at decision makers. Two safeguards:
   whoever wrote the analysed code; that is where someone would try to inject instructions into the
   model.
 
+- **The model's answer is untrusted text.** It goes to the pull request, and the prompt carries
+  package and rule names that came from the analyzed code. Before it leaves, the summary loses
+  Markdown images (which would leak data when loaded), links and bare addresses, HTML, `@`
+  mentions and invisible characters, and is capped at 1,500 characters.
+
 Without the model, the triage is the same.
+
+### On the pull request
+
+The `triagem-pr.yml` workflow starts Ollama as a container inside the runner itself, with a small
+model (`llama3.2:1b`), runs the triage and comments the result on the pull request, updating the
+same comment on every push. Nothing leaves the runner. Blocking is still decided by the priority
+rules: the model only writes the summary. Pull requests from forks get a read-only token, so the
+summary stays in the run summary, without a comment.
 
 ## crivo's own security
 

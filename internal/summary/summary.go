@@ -17,8 +17,10 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/fabriciojunio/crivo/internal/priority"
 )
@@ -100,5 +102,42 @@ func (c *Client) Summarize(ctx context.Context, open []priority.Triage) (string,
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&out); err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(out.Response), nil
+	return Neutralize(out.Response), nil
+}
+
+// MaxRunes limita o resumo: cinco frases cabem com folga, e um modelo
+// manipulado não consegue encher o pull request de texto.
+const MaxRunes = 1500
+
+var (
+	markdownImage = regexp.MustCompile(`!\[[^\]]*\]\([^)]*\)`)
+	markdownLink  = regexp.MustCompile(`\[([^\]]*)\]\([^)]*\)`)
+	rawAddress    = regexp.MustCompile(`(?i)\b(?:[a-z][a-z0-9+.-]*://|www\.)\S+`)
+	mention       = regexp.MustCompile(`@([A-Za-z0-9])`)
+)
+
+// Neutralize trata a resposta do modelo como texto não confiável. Ela vai
+// para um comentário no pull request, e o prompt carrega nome de pacote e de
+// regra que vieram do código analisado: quem controla esses nomes pode tentar
+// fazer o modelo escrever uma imagem que vaza dados ao carregar, um link de
+// phishing ou uma menção que notifica alguém. Sobra só o texto.
+func Neutralize(s string) string {
+	s = strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\t' {
+			return r
+		}
+		if unicode.IsControl(r) || unicode.Is(unicode.Cf, r) {
+			return -1
+		}
+		return r
+	}, s)
+	s = markdownImage.ReplaceAllString(s, "")
+	s = markdownLink.ReplaceAllString(s, "$1")
+	s = rawAddress.ReplaceAllString(s, "[endereço removido]")
+	s = strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;").Replace(s)
+	s = mention.ReplaceAllString(s, "@\u200b$1")
+	if r := []rune(s); len(r) > MaxRunes {
+		s = string(r[:MaxRunes]) + "…"
+	}
+	return strings.TrimSpace(s)
 }

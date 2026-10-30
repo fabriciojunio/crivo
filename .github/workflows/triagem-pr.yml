@@ -1,0 +1,80 @@
+name: Triagem no pull request
+
+# Triagem do crivo com resumo de modelo de linguagem, comentada no pull request.
+#
+# O modelo roda dentro do próprio runner, num contêiner do Ollama: o mapa de
+# falhas do projeto não sai da máquina, coerente com o cliente do crivo, que
+# recusa endereço que não seja local. A decisão de barrar continua com as
+# regras de prioridade; o modelo só escreve o resumo, e a resposta dele é
+# tratada como texto não confiável antes de chegar ao comentário.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  triagem:
+    name: Triagem do crivo com resumo de modelo local
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+    services:
+      ollama:
+        image: ollama/ollama:0.40.9@sha256:5c6707fcf2e1a30cffe2ecb7e315584fc87747c389327e4bc711c4959aa1eecc
+        ports:
+          - 11434:11434
+    env:
+      MODELO: llama3.2:1b
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Baixar o modelo no Ollama do runner
+        run: |
+          for _ in $(seq 1 30); do curl -fsS http://127.0.0.1:11434/api/version > /dev/null && break; sleep 2; done
+          curl -fsS --max-time 600 http://127.0.0.1:11434/api/pull -d "{\"model\":\"$MODELO\",\"stream\":false}"
+
+      - name: Compilar o crivo
+        run: go build -trimpath -o crivo ./cmd/crivo
+
+      # Prova o caminho inteiro com relatórios reais de outros projetos
+      # (testdata/), que têm achados abertos: sem eles o resumo nunca seria
+      # pedido, porque o crivo quase não tem achado próprio.
+      - name: Resumo de ponta a ponta com relatório real
+        run: |
+          ./crivo -offline -osv testdata/osv.json -sarif testdata/semgrep.sarif \
+            -resumo "$MODELO" -falhar-em nunca > exemplo.md
+          grep -q '^## Resumo' exemplo.md
+          if grep -Eiq '!\[|https?://|<[a-z]' <(sed -n '/^## Resumo/,/^## /p' exemplo.md); then
+            echo "o resumo chegou com imagem, endereço ou HTML"
+            exit 1
+          fi
+          { echo "### Resumo de exemplo (testdata)"; sed -n '/^## Resumo/,/^## /p' exemplo.md; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Triagem do código deste pull request
+        run: |
+          go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -no-fail -fmt sarif -out gosec.sarif ./...
+          ./crivo -offline -sarif gosec.sarif -resumo "$MODELO" -falhar-em nunca > triagem.md
+          cat triagem.md >> "$GITHUB_STEP_SUMMARY"
+
+      # Pull request de fork recebe token só de leitura; o resumo fica no
+      # resumo da execução, sem comentário.
+      - name: Comentar no pull request
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPOSITORIO: ${{ github.repository }}
+        run: gh pr comment "$PR" -R "$REPOSITORIO" --body-file triagem.md --edit-last --create-if-none

@@ -74,7 +74,20 @@ português para quem decide. Duas proteções:
 - **Texto da ferramenta fica de fora do prompt.** A descrição do achado vem, no fim, de quem
   escreveu o código analisado; é por ela que alguém tentaria injetar instrução no modelo.
 
+- **A resposta do modelo é texto não confiável.** Ela vai para o pull request, e o prompt leva nome
+  de pacote e de regra que vieram do código analisado. Antes de sair, o resumo perde imagem
+  Markdown (que vazaria dados ao carregar), link e endereço solto, HTML, menção com `@` e caractere
+  invisível, e fica limitado a 1.500 caracteres.
+
 Sem o modelo, a triagem é a mesma.
+
+### No pull request
+
+O workflow `triagem-pr.yml` sobe o Ollama como contêiner dentro do próprio runner, com um modelo
+pequeno (`llama3.2:1b`), roda a triagem e comenta o resultado no pull request, atualizando o mesmo
+comentário a cada push. Nada sai do runner. A decisão de barrar continua com as regras de
+prioridade: o modelo só escreve o resumo. Pull request de fork recebe token só de leitura, então o
+resumo fica no resumo da execução, sem comentário.
 
 ## Segurança do próprio crivo
 

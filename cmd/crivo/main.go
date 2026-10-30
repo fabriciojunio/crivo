@@ -97,7 +97,9 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 			return exitError
 		}
 		accepted, err = accept.Load(f)
-		f.Close()
+		if errClose := f.Close(); err == nil {
+			err = errClose
+		}
 		if err != nil {
 			fmt.Fprintln(stderr, err)
 			return exitError

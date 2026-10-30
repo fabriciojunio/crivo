@@ -85,7 +85,7 @@ Without the model, the triage is the same.
 ### On the pull request
 
 The `triagem-pr.yml` workflow starts Ollama as a container inside the runner itself, with a small
-model (`llama3.2:1b`), runs the triage and comments the result on the pull request, updating the
+model (`qwen2.5:3b`, which writes Portuguese better than 1B models), runs the triage and comments the result on the pull request, updating the
 same comment on every push. Nothing leaves the runner. Blocking is still decided by the priority
 rules: the model only writes the summary. Pull requests from forks get a read-only token, so the
 summary stays in the run summary, without a comment.

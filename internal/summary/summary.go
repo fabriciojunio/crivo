@@ -64,9 +64,13 @@ func checkLocal(raw string) error {
 // fora, porque é por ele que alguém tentaria injetar instrução no modelo.
 func Prompt(open []priority.Triage) string {
 	var b strings.Builder
-	b.WriteString("Você resume uma triagem de vulnerabilidades para uma pessoa que decide prioridades. ")
-	b.WriteString("Escreva em português, em até cinco frases, sem inventar achado que não está na lista. ")
-	b.WriteString("Diga o que corrigir primeiro e por quê.\n\nAchados:\n")
+	// Modelo pequeno se perde com instrução vaga: o texto diz o que é a lista,
+	// o formato da resposta e o que não fazer.
+	b.WriteString("Abaixo está a lista de vulnerabilidades encontradas num projeto de software, ")
+	b.WriteString("já ordenada por prioridade (P1 é a mais urgente) e com o prazo de correção de cada uma.\n")
+	b.WriteString("Escreva um resumo em português do Brasil, em no máximo cinco frases, para a gerente do projeto: ")
+	b.WriteString("quantas falhas existem, quais corrigir primeiro e por quê, citando o pacote e o prazo.\n")
+	b.WriteString("Use só o que está na lista. Não invente falha, não escreva link nem código.\n\nVulnerabilidades:\n")
 	for i, t := range open {
 		if i == 10 {
 			fmt.Fprintf(&b, "- e mais %d achados de prioridade menor\n", len(open)-10)

@@ -47,6 +47,7 @@ crivo -osv osv.json -sarif codeql.sarif -zap zap.json \
 | `-formato` | `md` (tabela para o pull request) ou `json` |
 | `-offline` | não consulta EPSS nem KEV |
 | `-resumo` | nome de um modelo do Ollama local para resumir a triagem |
+| `-resumo-tempo` | tempo máximo do resumo; o padrão é `1m`, e sem GPU um modelo de 3B pode pedir alguns minutos |
 
 Saída `0` quando passa, `1` quando barra e `2` quando não conseguiu rodar. A diferença importa: erro
 de leitura não pode passar como pipeline verde.

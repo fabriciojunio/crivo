@@ -47,6 +47,7 @@ crivo -osv osv.json -sarif codeql.sarif -zap zap.json \
 | `-formato` | `md` (table for the pull request) or `json` |
 | `-offline` | skips EPSS and KEV |
 | `-resumo` | name of a local Ollama model to summarise the triage |
+| `-resumo-tempo` | maximum time for the summary; the default is `1m`, and without a GPU a 3B model may need a few minutes |
 
 Exit code `0` when it passes, `1` when it blocks and `2` when it could not run. The difference
 matters: a read error must not pass as a green pipeline.

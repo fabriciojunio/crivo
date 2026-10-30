@@ -55,7 +55,7 @@ jobs:
       - name: Resumo de ponta a ponta com relatório real
         run: |
           ./crivo -offline -osv testdata/osv.json -sarif testdata/semgrep.sarif \
-            -resumo "$MODELO" -falhar-em nunca > exemplo.md
+            -resumo "$MODELO" -resumo-tempo 4m -falhar-em nunca > exemplo.md
           grep -q '^## Resumo' exemplo.md
           if grep -Eiq '!\[|https?://|<[a-z]' <(sed -n '/^## Resumo/,/^## /p' exemplo.md); then
             echo "o resumo chegou com imagem, endereço ou HTML"
@@ -66,7 +66,7 @@ jobs:
       - name: Triagem do código deste pull request
         run: |
           go run github.com/securego/gosec/v2/cmd/gosec@v2.29.0 -no-fail -fmt sarif -out gosec.sarif ./...
-          ./crivo -offline -sarif gosec.sarif -resumo "$MODELO" -falhar-em nunca > triagem.md
+          ./crivo -offline -sarif gosec.sarif -resumo "$MODELO" -resumo-tempo 4m -falhar-em nunca > triagem.md
           cat triagem.md >> "$GITHUB_STEP_SUMMARY"
 
       # Pull request de fork recebe token só de leitura; o resumo fica no

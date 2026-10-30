@@ -38,11 +38,15 @@ type Client struct {
 	Model string
 }
 
-// New cria o cliente. Modelo local em máquina comum demora; um minuto cobre
-// o primeiro carregamento sem prender o pipeline indefinidamente.
-func New(model string) *Client {
-	return &Client{HTTP: &http.Client{Timeout: time.Minute}, URL: DefaultURL, Model: model}
+// New cria o cliente. O tempo vem de quem roda: em máquina com GPU um minuto
+// sobra; num runner de CI só com CPU, um modelo de 3B leva alguns minutos.
+func New(model string, timeout time.Duration) *Client {
+	return &Client{HTTP: &http.Client{Timeout: timeout}, URL: DefaultURL, Model: model}
 }
+
+// maxTokens limita a resposta no próprio modelo: cinco frases cabem com
+// folga, e o modelo não gasta tempo escrevendo o que vai ser cortado.
+const maxTokens = 300
 
 func checkLocal(raw string) error {
 	u, err := url.Parse(raw)
@@ -86,7 +90,10 @@ func (c *Client) Summarize(ctx context.Context, open []priority.Triage) (string,
 	if err := checkLocal(c.URL); err != nil {
 		return "", err
 	}
-	body, _ := json.Marshal(map[string]any{"model": c.Model, "prompt": Prompt(open), "stream": false})
+	body, _ := json.Marshal(map[string]any{
+		"model": c.Model, "prompt": Prompt(open), "stream": false,
+		"options": map[string]any{"num_predict": maxTokens},
+	})
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.URL, bytes.NewReader(body))
 	if err != nil {
 		return "", err

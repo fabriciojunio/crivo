@@ -61,6 +61,7 @@ jobs:
             echo "o resumo chegou com imagem, endereço ou HTML"
             exit 1
           fi
+          sed -n '/^## Resumo/,/^| Prioridade/p' exemplo.md
           { echo "### Resumo de exemplo (testdata)"; sed -n '/^## Resumo/,/^## /p' exemplo.md; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Triagem do código deste pull request

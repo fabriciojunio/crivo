@@ -66,6 +66,24 @@ func TestPromptCapsAtTen(t *testing.T) {
 	}
 }
 
+func TestPromptTrazTotaisEPrazoPorNivel(t *testing.T) {
+	dia := func(d int) time.Time { return time.Date(2026, 11, d, 0, 0, 0, 0, time.UTC) }
+	var open []priority.Triage
+	for i := range 9 {
+		open = append(open, priority.Triage{Level: priority.P2, Due: dia(29 - i%2)})
+	}
+	open = append(open, priority.Triage{Level: priority.P3, Due: dia(30)}, priority.Triage{Level: priority.P3, Due: dia(30)})
+	p := Prompt(open)
+	for _, esperado := range []string{"Total: 11 vulnerabilidades.", "P2: 9, prazo a partir de 2026-11-28.", "P3: 2, prazo a partir de 2026-11-30."} {
+		if !strings.Contains(p, esperado) {
+			t.Errorf("prompt sem %q:\n%s", esperado, p)
+		}
+	}
+	if strings.Contains(p, "P1:") {
+		t.Error("nível sem achado não entra nos totais")
+	}
+}
+
 func jsonDecode(r *http.Request, v any) error {
 	return json.NewDecoder(r.Body).Decode(v)
 }

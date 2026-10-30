@@ -74,7 +74,24 @@ func Prompt(open []priority.Triage) string {
 	b.WriteString("já ordenada por prioridade (P1 é a mais urgente) e com o prazo de correção de cada uma.\n")
 	b.WriteString("Escreva um resumo em português do Brasil, em no máximo cinco frases, para a gerente do projeto: ")
 	b.WriteString("quantas falhas existem, quais corrigir primeiro e por quê, citando o pacote e o prazo.\n")
-	b.WriteString("Use só o que está na lista. Não invente falha, não escreva link nem código.\n\nVulnerabilidades:\n")
+	b.WriteString("Use só o que está na lista e os totais abaixo. Não invente falha, não escreva link nem código.\n\n")
+	// Totais e prazos prontos: modelo pequeno erra conta, e a lista abaixo
+	// mostra só os dez primeiros.
+	total := map[priority.Level]int{}
+	prazo := map[priority.Level]time.Time{}
+	for _, t := range open {
+		total[t.Level]++
+		if prazo[t.Level].IsZero() || t.Due.Before(prazo[t.Level]) {
+			prazo[t.Level] = t.Due
+		}
+	}
+	fmt.Fprintf(&b, "Total: %d vulnerabilidades.\n", len(open))
+	for _, nivel := range []priority.Level{priority.P1, priority.P2, priority.P3, priority.P4} {
+		if total[nivel] > 0 {
+			fmt.Fprintf(&b, "%s: %d, prazo a partir de %s.\n", nivel, total[nivel], prazo[nivel].Format(time.DateOnly))
+		}
+	}
+	b.WriteString("\nVulnerabilidades:\n")
 	for i, t := range open {
 		if i == 10 {
 			fmt.Fprintf(&b, "- e mais %d achados de prioridade menor\n", len(open)-10)

@@ -90,6 +90,41 @@ comentário a cada push. Nada sai do runner. A decisão de barrar continua com a
 prioridade: o modelo só escreve o resumo. Pull request de fork recebe token só de leitura, então o
 resumo fica no resumo da execução, sem comentário.
 
+## Ciclo de vida das falhas
+
+Barrar o pipeline resolve o achado novo. O que já está no código precisa de dono e de prazo até ser
+corrigido, e é aí que entra a gestão de vulnerabilidades. O crivo atende de dois jeitos.
+
+### Issues no GitHub
+
+```bash
+GITHUB_TOKEN=... crivo sincronizar -repo dono/nome -osv osv.json -sarif semgrep.sarif
+crivo sincronizar -simular -osv osv.json      # só mostra o plano
+```
+
+| Situação na varredura | O que acontece com a issue |
+|---|---|
+| achado novo | abre, com as labels `crivo` e `P1` a `P4`, o motivo e o prazo |
+| achado que sumiu | recebe comentário com a data e fecha como corrigida |
+| achado que voltou | reabre, com comentário |
+| prioridade mudou (entrou no KEV, por exemplo) | troca só a label de prioridade |
+
+A issue é reconhecida pela impressão digital do achado, guardada no corpo num comentário HTML; issue
+sem esse marcador nunca é tocada, e label posta por gente fica. O texto que vem do código analisado
+passa por limpeza antes de virar issue: sem HTML, menção com `@`, link nem marcador forjado. O token
+só sai por HTTPS, o repositório é validado antes de entrar na URL e o cliente não segue
+redirecionamento.
+
+### DefectDojo
+
+```bash
+crivo -formato defectdojo -osv osv.json -falhar-em nunca > crivo-defectdojo.json
+```
+
+O arquivo sai no formato do importador genérico ("Generic Findings Import"). A severidade enviada é a
+prioridade do crivo, então o SLA padrão do DefectDojo (7, 30 e 90 dias) bate com o prazo calculado, e
+a impressão digital vai como id único, para a reimportação reconhecer o mesmo achado.
+
 ## Segurança do próprio crivo
 
 - Nenhuma dependência fora da biblioteca padrão do Go: a ferramenta que avalia a cadeia de
@@ -124,6 +159,9 @@ internal/priority/  regras de prioridade e prazo
 internal/accept/    riscos aceitos com prazo
 internal/report/    Markdown e JSON
 internal/summary/   resumo opcional por modelo local
+internal/lifecycle/ plano de abrir, fechar e reabrir issues
+internal/github/    cliente da API de issues
+internal/defectdojo/ exportação para o DefectDojo
 ```
 
 ## Uso de IA

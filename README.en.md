@@ -91,6 +91,42 @@ same comment on every push. Nothing leaves the runner. Blocking is still decided
 rules: the model only writes the summary. Pull requests from forks get a read-only token, so the
 summary stays in the run summary, without a comment.
 
+## Vulnerability lifecycle
+
+Blocking the pipeline handles new findings. What is already in the code needs an owner and a
+deadline until it is fixed, which is what vulnerability management is about. crivo covers it in two
+ways.
+
+### GitHub issues
+
+```bash
+GITHUB_TOKEN=... crivo sincronizar -repo owner/name -osv osv.json -sarif semgrep.sarif
+crivo sincronizar -simular -osv osv.json      # only prints the plan
+```
+
+| In the scan | What happens to the issue |
+|---|---|
+| new finding | opens, with the `crivo` and `P1` to `P4` labels, the reason and the deadline |
+| finding gone | gets a dated comment and closes as completed |
+| finding back | reopens, with a comment |
+| priority changed (entered KEV, for example) | only the priority label changes |
+
+The issue is matched by the finding fingerprint, stored in the body as an HTML comment; an issue
+without that marker is never touched, and labels added by people are kept. Text coming from the
+scanned code is cleaned before it becomes an issue: no HTML, `@` mentions, links or forged markers.
+The token only goes over HTTPS, the repository is validated before it reaches the URL and the client
+does not follow redirects.
+
+### DefectDojo
+
+```bash
+crivo -formato defectdojo -osv osv.json -falhar-em nunca > crivo-defectdojo.json
+```
+
+The file uses the Generic Findings Import format. The severity sent is crivo's priority, so
+DefectDojo's default SLA (7, 30 and 90 days) matches the computed deadline, and the fingerprint goes
+as the unique id so a re-import recognises the same finding.
+
 ## crivo's own security
 
 - No dependency beyond Go's standard library: the tool that assesses other projects' supply chain
@@ -124,6 +160,9 @@ internal/priority/  priority and deadline rules
 internal/accept/    time-boxed accepted risks
 internal/report/    Markdown and JSON
 internal/summary/   optional summary by a local model
+internal/lifecycle/ plan to open, close and reopen issues
+internal/github/    issues API client
+internal/defectdojo/ DefectDojo export
 ```
 
 ## Use of AI

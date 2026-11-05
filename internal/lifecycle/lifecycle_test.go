@@ -138,3 +138,20 @@ func TestLabelsCarryThePriority(t *testing.T) {
 		t.Fatalf("labels = %v", got)
 	}
 }
+
+func TestMergeKeepsHumanLabelsAndSwapsOnlyThePriority(t *testing.T) {
+	got := Merge([]string{"P3", "time-pagamentos", Label, "em andamento"}, achado("a", finding.SeverityHigh))
+	want := "crivo,time-pagamentos,em andamento,P2"
+	if strings.Join(got, ",") != want {
+		t.Fatalf("labels = %v, quero %s", got, want)
+	}
+}
+
+func TestRelabelAndReopenCarryTheCurrentLabels(t *testing.T) {
+	a := achado("lfi", finding.SeverityHigh)
+	issues := []Issue{{Number: 4, Open: true, Fingerprint: a.Fingerprint(), Labels: []string{Label, "P4", "time-x"}}}
+	plan := Plan([]priority.Triage{a}, issues)
+	if len(plan) != 1 || strings.Join(plan[0].Labels, ",") != "crivo,P4,time-x" {
+		t.Fatalf("a ação tem que levar as labels atuais: %+v", plan)
+	}
+}

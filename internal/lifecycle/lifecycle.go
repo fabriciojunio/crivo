@@ -43,11 +43,13 @@ func (k Kind) String() string {
 	return map[Kind]string{Create: "abrir", Close: "fechar", Reopen: "reabrir", Relabel: "atualizar prioridade"}[k]
 }
 
-// Action é um passo do plano. Triage vem vazio no Close.
+// Action é um passo do plano. Triage vem vazio no Close. Labels são as que a
+// issue já tem, para quem aplica o plano trocar só a da prioridade.
 type Action struct {
 	Kind   Kind
 	Issue  int
 	Triage priority.Triage
+	Labels []string
 }
 
 // Plan compara a varredura com as issues. A ordem do resultado é estável:
@@ -80,9 +82,9 @@ func Plan(open []priority.Triage, issues []Issue) []Action {
 		case !ok:
 			plan = append(plan, Action{Kind: Create, Triage: t})
 		case !is.Open:
-			plan = append(plan, Action{Kind: Reopen, Issue: is.Number, Triage: t})
+			plan = append(plan, Action{Kind: Reopen, Issue: is.Number, Triage: t, Labels: is.Labels})
 		case !slices.Contains(is.Labels, t.Level.String()):
-			plan = append(plan, Action{Kind: Relabel, Issue: is.Number, Triage: t})
+			plan = append(plan, Action{Kind: Relabel, Issue: is.Number, Triage: t, Labels: is.Labels})
 		}
 	}
 
@@ -112,6 +114,20 @@ func FingerprintFrom(body string) string {
 
 // Labels da issue de um achado: a do crivo e a da prioridade.
 func Labels(t priority.Triage) []string { return []string{Label, t.Level.String()} }
+
+var levelLabel = regexp.MustCompile(`^P[1-4]$`)
+
+// Merge troca só a label de prioridade e garante a do crivo. As outras foram
+// postas por gente (time, componente, "em andamento") e ficam.
+func Merge(current []string, t priority.Triage) []string {
+	out := []string{Label}
+	for _, l := range current {
+		if l != Label && !levelLabel.MatchString(l) {
+			out = append(out, l)
+		}
+	}
+	return append(out, t.Level.String())
+}
 
 // Title da issue, curto o bastante para a lista.
 func Title(t priority.Triage) string {

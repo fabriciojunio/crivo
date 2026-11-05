@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/fabriciojunio/crivo/internal/accept"
+	"github.com/fabriciojunio/crivo/internal/defectdojo"
 	"github.com/fabriciojunio/crivo/internal/enrich"
 	"github.com/fabriciojunio/crivo/internal/finding"
 	"github.com/fabriciojunio/crivo/internal/parser"
@@ -56,7 +57,7 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 	acceptFile := fs.String("aceites", "", "arquivo JSON com os riscos aceitos e o prazo de cada um")
 	offline := fs.Bool("offline", false, "não consulta EPSS nem KEV")
 	failAt := fs.String("falhar-em", "P2", "barra o pipeline com achado deste nível ou mais urgente (P1 a P4, ou nunca)")
-	format := fs.String("formato", "md", "md ou json")
+	format := fs.String("formato", "md", "md, json ou defectdojo (importação genérica do DefectDojo)")
 	model := fs.String("resumo", "", "modelo do Ollama local para resumir a triagem (opcional)")
 	modelTimeout := fs.Duration("resumo-tempo", time.Minute, "tempo máximo do resumo; sem GPU, modelo de 3B pode precisar de alguns minutos")
 	if err := fs.Parse(args); err != nil {
@@ -151,6 +152,8 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 	switch *format {
 	case "json":
 		err = report.JSON(stdout, res)
+	case "defectdojo":
+		err = defectdojo.Write(stdout, res.Open, res.Generated)
 	case "md":
 		err = report.Markdown(stdout, res)
 	default:

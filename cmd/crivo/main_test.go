@@ -126,6 +126,26 @@ func TestEnrichmentFailureFallsBackWithWarning(t *testing.T) {
 	}
 }
 
+func TestDefectDojoFormatExportsOpenFindings(t *testing.T) {
+	var out, errOut bytes.Buffer
+	code := run([]string{"-osv", td + "osv.json", "-offline", "-formato", "defectdojo", "-falhar-em", "nunca"}, &out, &errOut, offlineDeps())
+	if code != exitOK {
+		t.Fatalf("código = %d, stderr = %s", code, errOut.String())
+	}
+	var doc struct {
+		Findings []struct {
+			UniqueID string `json:"unique_id_from_tool"`
+			Severity string `json:"severity"`
+		} `json:"findings"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &doc); err != nil {
+		t.Fatalf("saída não é JSON: %v", err)
+	}
+	if len(doc.Findings) == 0 || doc.Findings[0].UniqueID == "" || doc.Findings[0].Severity == "" {
+		t.Fatalf("documento sem achado ou sem id: %s", out.String())
+	}
+}
+
 func TestUsageErrors(t *testing.T) {
 	cases := [][]string{
 		{},

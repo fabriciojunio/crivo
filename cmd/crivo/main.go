@@ -47,15 +47,26 @@ func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr, deps{now: time.Now, enrich: enrich.NewClient()}))
 }
 
+// inputs são as opções comuns à triagem e à sincronização das issues.
+type inputs struct {
+	osv, sarif, zap files
+	acceptFile      string
+	offline         bool
+}
+
+func (in *inputs) register(fs *flag.FlagSet) {
+	fs.Var(&in.osv, "osv", "saída JSON do OSV-Scanner (pode repetir)")
+	fs.Var(&in.sarif, "sarif", "relatório SARIF do CodeQL ou do Semgrep (pode repetir)")
+	fs.Var(&in.zap, "zap", "relatório JSON do OWASP ZAP (pode repetir)")
+	fs.StringVar(&in.acceptFile, "aceites", "", "arquivo JSON com os riscos aceitos e o prazo de cada um")
+	fs.BoolVar(&in.offline, "offline", false, "não consulta EPSS nem KEV")
+}
+
 func run(args []string, stdout, stderr io.Writer, d deps) int {
 	fs := flag.NewFlagSet("crivo", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	var osv, sarif, zap files
-	fs.Var(&osv, "osv", "saída JSON do OSV-Scanner (pode repetir)")
-	fs.Var(&sarif, "sarif", "relatório SARIF do CodeQL ou do Semgrep (pode repetir)")
-	fs.Var(&zap, "zap", "relatório JSON do OWASP ZAP (pode repetir)")
-	acceptFile := fs.String("aceites", "", "arquivo JSON com os riscos aceitos e o prazo de cada um")
-	offline := fs.Bool("offline", false, "não consulta EPSS nem KEV")
+	var in inputs
+	in.register(fs)
 	failAt := fs.String("falhar-em", "P2", "barra o pipeline com achado deste nível ou mais urgente (P1 a P4, ou nunca)")
 	format := fs.String("formato", "md", "md, json ou defectdojo (importação genérica do DefectDojo)")
 	model := fs.String("resumo", "", "modelo do Ollama local para resumir a triagem (opcional)")
@@ -69,76 +80,15 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 		fmt.Fprintln(stderr, err)
 		return exitError
 	}
-	if len(osv)+len(sarif)+len(zap) == 0 {
-		fmt.Fprintln(stderr, "nenhum relatório informado: use -osv, -sarif ou -zap")
-		return exitError
-	}
-
-	var all []finding.Finding
-	for _, group := range []struct {
-		format parser.Format
-		paths  files
-	}{{parser.FormatOSV, osv}, {parser.FormatSARIF, sarif}, {parser.FormatZAP, zap}} {
-		for _, path := range group.paths {
-			found, err := readReport(group.format, path)
-			if err != nil {
-				fmt.Fprintf(stderr, "%s: %v\n", path, err)
-				return exitError
-			}
-			all = append(all, found...)
-		}
-	}
-	all = finding.Dedupe(all)
-
-	var accepted accept.List
-	if *acceptFile != "" {
-		// #nosec G304 -- arquivo de aceites indicado por quem roda a ferramenta.
-		f, err := os.Open(*acceptFile)
-		if err != nil {
-			fmt.Fprintln(stderr, err)
-			return exitError
-		}
-		accepted, err = accept.Load(f)
-		if errClose := f.Close(); err == nil {
-			err = errClose
-		}
-		if err != nil {
-			fmt.Fprintln(stderr, err)
-			return exitError
-		}
-	}
 
 	// Dois minutos para EPSS e KEV, mais o tempo do resumo quando ele é pedido.
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute+*modelTimeout)
 	defer cancel()
-	now := d.now()
-	res := report.Result{Generated: now, Offline: *offline}
-
-	epss, kev := map[string]float64{}, map[string]bool{}
-	if !*offline {
-		epss, kev, err = enrichAll(ctx, d.enrich, all)
-		if err != nil {
-			// Sem enriquecimento a triagem ainda vale, só fica mais pessimista
-			// com o que não é explorado. Avisa e segue, em vez de esconder.
-			fmt.Fprintf(stderr, "aviso: %v; seguindo só com a severidade\n", err)
-			res.Offline = true
-		}
+	res, err := triage(ctx, in, stderr, d)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return exitError
 	}
-
-	expiredSeen := map[string]bool{}
-	for _, f := range all {
-		ok, expired := accepted.Match(f, now)
-		if ok {
-			res.Accepted++
-			continue
-		}
-		if expired != nil && !expiredSeen[expired.Rule+expired.Package] {
-			expiredSeen[expired.Rule+expired.Package] = true
-			res.Expired = append(res.Expired, *expired)
-		}
-		res.Open = append(res.Open, priority.Decide(f, epss, kev, now))
-	}
-	priority.Sort(res.Open)
 
 	if *model != "" && len(res.Open) > 0 {
 		text, err := summary.New(*model, *modelTimeout).Summarize(ctx, res.Open)
@@ -174,6 +124,74 @@ func run(args []string, stdout, stderr io.Writer, d deps) int {
 		return exitBlocked
 	}
 	return exitOK
+}
+
+// triage lê os relatórios, tira repetições, aplica os aceites e decide a
+// prioridade de cada achado aberto. Falha de enriquecimento só avisa.
+func triage(ctx context.Context, in inputs, stderr io.Writer, d deps) (report.Result, error) {
+	if len(in.osv)+len(in.sarif)+len(in.zap) == 0 {
+		return report.Result{}, errors.New("nenhum relatório informado: use -osv, -sarif ou -zap")
+	}
+	var all []finding.Finding
+	for _, group := range []struct {
+		format parser.Format
+		paths  files
+	}{{parser.FormatOSV, in.osv}, {parser.FormatSARIF, in.sarif}, {parser.FormatZAP, in.zap}} {
+		for _, path := range group.paths {
+			found, err := readReport(group.format, path)
+			if err != nil {
+				return report.Result{}, fmt.Errorf("%s: %w", path, err)
+			}
+			all = append(all, found...)
+		}
+	}
+	all = finding.Dedupe(all)
+
+	var accepted accept.List
+	if in.acceptFile != "" {
+		// #nosec G304 -- arquivo de aceites indicado por quem roda a ferramenta.
+		f, err := os.Open(in.acceptFile)
+		if err != nil {
+			return report.Result{}, err
+		}
+		accepted, err = accept.Load(f)
+		if errClose := f.Close(); err == nil {
+			err = errClose
+		}
+		if err != nil {
+			return report.Result{}, err
+		}
+	}
+
+	now := d.now()
+	res := report.Result{Generated: now, Offline: in.offline}
+	epss, kev := map[string]float64{}, map[string]bool{}
+	if !in.offline {
+		var err error
+		epss, kev, err = enrichAll(ctx, d.enrich, all)
+		if err != nil {
+			// Sem enriquecimento a triagem ainda vale, só fica mais pessimista
+			// com o que não é explorado. Avisa e segue, em vez de esconder.
+			fmt.Fprintf(stderr, "aviso: %v; seguindo só com a severidade\n", err)
+			res.Offline = true
+		}
+	}
+
+	expiredSeen := map[string]bool{}
+	for _, f := range all {
+		ok, expired := accepted.Match(f, now)
+		if ok {
+			res.Accepted++
+			continue
+		}
+		if expired != nil && !expiredSeen[expired.Rule+expired.Package] {
+			expiredSeen[expired.Rule+expired.Package] = true
+			res.Expired = append(res.Expired, *expired)
+		}
+		res.Open = append(res.Open, priority.Decide(f, epss, kev, now))
+	}
+	priority.Sort(res.Open)
+	return res, nil
 }
 
 func readReport(format parser.Format, path string) ([]finding.Finding, error) {

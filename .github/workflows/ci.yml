@@ -37,6 +37,12 @@ jobs:
         run: go test -run '^$' -fuzz FuzzParse -fuzztime 60s ./internal/parser
       - name: Compilar
         run: go build -trimpath -o crivo ./cmd/crivo
+      # Sem token a sincronização só mostra o plano: prova de ponta a ponta com
+      # os relatórios reais de testdata/, sem abrir issue de mentira no repositório.
+      - name: Sincronização das issues, simulada
+        run: ./crivo sincronizar -simular -offline -osv testdata/osv.json -sarif testdata/semgrep.sarif -zap testdata/zap.json
+      - name: Exportação para o DefectDojo
+        run: ./crivo -formato defectdojo -offline -falhar-em nunca -osv testdata/osv.json | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['findings'] and all(f['unique_id_from_tool'] for f in d['findings']); print(len(d['findings']), 'achados exportados')"
 
   seguranca:
     name: Segurança (govulncheck, gosec e o próprio crivo)

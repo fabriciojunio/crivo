@@ -2,8 +2,12 @@ package main
 
 import (
 	"bytes"
+	"time"
+
 	"encoding/json"
 	"fmt"
+	"github.com/fabriciojunio/crivo/internal/finding"
+	"github.com/fabriciojunio/crivo/internal/priority"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -72,5 +76,14 @@ func TestSyncAppliesThePlanAgainstTheAPI(t *testing.T) {
 	}
 	if !strings.Contains(out.String(), "ações aplicadas") {
 		t.Fatalf("saída sem o resumo: %s", out.String())
+	}
+}
+
+func TestPlainDropsControlCharactersFromToolText(t *testing.T) {
+	tr := priority.Decide(finding.Finding{Rule: "regra\x1b[2K\rFALSO OK", Location: "a.js:1",
+		Severity: finding.SeverityHigh}, nil, nil, time.Now())
+	got := plain(tr)
+	if strings.ContainsAny(got, "\x1b\r\n") || got != "[P2] regra[2KFALSO OK em a.js:1" {
+		t.Fatalf("plain = %q", got)
 	}
 }

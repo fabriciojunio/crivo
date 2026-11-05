@@ -5,10 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/fabriciojunio/crivo/internal/github"
 	"github.com/fabriciojunio/crivo/internal/lifecycle"
+	"github.com/fabriciojunio/crivo/internal/priority"
 )
 
 // runSync é o "crivo sincronizar": a mesma triagem, mas em vez de barrar o
@@ -60,7 +63,7 @@ func runSync(args []string, stdout, stderr io.Writer, d deps) int {
 			fmt.Fprintf(stdout, "%-20s #%d\n", a.Kind, a.Issue)
 			continue
 		}
-		alvo := lifecycle.Title(a.Triage)
+		alvo := plain(a.Triage)
 		if a.Issue != 0 {
 			alvo = fmt.Sprintf("#%d %s", a.Issue, alvo)
 		}
@@ -80,4 +83,21 @@ func runSync(args []string, stdout, stderr io.Writer, d deps) int {
 		return exitError
 	}
 	return exitOK
+}
+
+// plain descreve o achado para o terminal. Sem escape de Markdown, que só serve
+// na issue, e sem caractere de controle: uma sequência ANSI no nome da regra
+// apagaria ou falsificaria linhas do log do CI.
+func plain(t priority.Triage) string {
+	alvo := t.Package
+	if alvo == "" {
+		alvo = t.Location
+	}
+	s := fmt.Sprintf("[%s] %s em %s", t.Level, t.Rule, alvo)
+	return strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) {
+			return -1
+		}
+		return r
+	}, s)
 }

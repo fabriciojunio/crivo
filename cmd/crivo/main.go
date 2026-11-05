@@ -37,14 +37,17 @@ type files []string
 func (f *files) String() string     { return strings.Join(*f, ",") }
 func (f *files) Set(v string) error { *f = append(*f, v); return nil }
 
-// deps é o que o teste troca: relógio e cliente do enriquecimento.
+// deps é o que o teste troca: relógio, cliente do enriquecimento, variável de
+// ambiente (de onde vem o token) e endereço da API do GitHub.
 type deps struct {
-	now    func() time.Time
-	enrich *enrich.Client
+	now       func() time.Time
+	enrich    *enrich.Client
+	getenv    func(string) string
+	githubAPI string
 }
 
 func main() {
-	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr, deps{now: time.Now, enrich: enrich.NewClient()}))
+	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr, deps{now: time.Now, enrich: enrich.NewClient(), getenv: os.Getenv}))
 }
 
 // inputs são as opções comuns à triagem e à sincronização das issues.
@@ -63,6 +66,9 @@ func (in *inputs) register(fs *flag.FlagSet) {
 }
 
 func run(args []string, stdout, stderr io.Writer, d deps) int {
+	if len(args) > 0 && args[0] == "sincronizar" {
+		return runSync(args[1:], stdout, stderr, d)
+	}
 	fs := flag.NewFlagSet("crivo", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	var in inputs

@@ -19,7 +19,9 @@ const td = "../../testdata/"
 
 var fixed = func() time.Time { return time.Date(2026, 10, 29, 12, 0, 0, 0, time.UTC) }
 
-func offlineDeps() deps { return deps{now: fixed, enrich: enrich.NewClient()} }
+func offlineDeps() deps {
+	return deps{now: fixed, enrich: enrich.NewClient(), getenv: func(string) string { return "" }}
+}
 
 func TestOfflineTriageOfRealReports(t *testing.T) {
 	var out, errOut bytes.Buffer

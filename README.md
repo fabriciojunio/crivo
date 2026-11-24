@@ -163,8 +163,3 @@ internal/lifecycle/ plano de abrir, fechar e reabrir issues
 internal/github/    cliente da API de issues
 internal/defectdojo/ exportação para o DefectDojo
 ```
-
-## Uso de IA
-
-Este projeto foi estruturado com apoio de ferramentas de IA generativa. Modelagem, regras de
-negócio, revisão do código e conclusões foram revisadas e validadas por Fabrício Júnio.

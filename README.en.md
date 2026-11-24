@@ -164,8 +164,3 @@ internal/lifecycle/ plan to open, close and reopen issues
 internal/github/    issues API client
 internal/defectdojo/ DefectDojo export
 ```
-
-## Use of AI
-
-This project was structured with the support of generative AI tools. Modelling, business rules,
-code review and conclusions were reviewed and validated by Fabrício Júnio.

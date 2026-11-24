@@ -19,7 +19,9 @@ const td = "../../testdata/"
 
 var fixed = func() time.Time { return time.Date(2026, 10, 29, 12, 0, 0, 0, time.UTC) }
 
-func offlineDeps() deps { return deps{now: fixed, enrich: enrich.NewClient()} }
+func offlineDeps() deps {
+	return deps{now: fixed, enrich: enrich.NewClient(), getenv: func(string) string { return "" }}
+}
 
 func TestOfflineTriageOfRealReports(t *testing.T) {
 	var out, errOut bytes.Buffer
@@ -123,6 +125,26 @@ func TestEnrichmentFailureFallsBackWithWarning(t *testing.T) {
 	run([]string{"-osv", td + "osv.json", "-falhar-em", "nunca"}, &out, &errOut, deps{now: fixed, enrich: c})
 	if !strings.Contains(errOut.String(), "aviso:") || !strings.Contains(out.String(), "modo offline") {
 		t.Fatalf("a falha do enriquecimento tem que aparecer:\nstderr=%s\nout=%s", errOut.String(), out.String())
+	}
+}
+
+func TestDefectDojoFormatExportsOpenFindings(t *testing.T) {
+	var out, errOut bytes.Buffer
+	code := run([]string{"-osv", td + "osv.json", "-offline", "-formato", "defectdojo", "-falhar-em", "nunca"}, &out, &errOut, offlineDeps())
+	if code != exitOK {
+		t.Fatalf("código = %d, stderr = %s", code, errOut.String())
+	}
+	var doc struct {
+		Findings []struct {
+			UniqueID string `json:"unique_id_from_tool"`
+			Severity string `json:"severity"`
+		} `json:"findings"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &doc); err != nil {
+		t.Fatalf("saída não é JSON: %v", err)
+	}
+	if len(doc.Findings) == 0 || doc.Findings[0].UniqueID == "" || doc.Findings[0].Severity == "" {
+		t.Fatalf("documento sem achado ou sem id: %s", out.String())
 	}
 }
 
